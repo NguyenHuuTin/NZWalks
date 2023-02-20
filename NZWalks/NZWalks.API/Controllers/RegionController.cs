@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using NZWalks.API.Domain.Models;
+
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Responsitories;
 
@@ -23,7 +23,7 @@ namespace NZWalks.API.Controllers
         public async Task<IActionResult> GetAllRegion()
         {
             var regions = await regionResponsitory.GetAllAsync();
-            var regionResult = mapper.Map<List<Domain.DTO.Region>>(regions);
+            var regionResult = mapper.Map<List<Models.DTO.Region>>(regions);
             return Ok(regionResult);
         }
 
@@ -38,14 +38,20 @@ namespace NZWalks.API.Controllers
                 return NotFound();
             }
 
-            var regionDTO = mapper.Map<Domain.DTO.Region>(region);
+            var regionDTO = mapper.Map<Models.DTO.Region>(region);
             return Ok(regionDTO);
         }
 
         [HttpPost]
         public async Task<IActionResult> AddRegionAsync(AddRegionRequest addRegionRequest)
         {
-            var region = new Domain.Models.Region()
+            // Validate add regoin
+            if (!ValidateAddRegoinAsync(addRegionRequest))
+            {
+                return BadRequest(ModelState);
+            }
+
+            var region = new Models.Domain.Region()
             {
                 code = addRegionRequest.code,
                 Area = addRegionRequest.Area,
@@ -57,7 +63,7 @@ namespace NZWalks.API.Controllers
 
             region = await regionResponsitory.AddAsync(region);
 
-            var regionDTO = new Domain.DTO.Region()
+            var regionDTO = new Models.DTO.Region()
             {
                 Id = region.Id,
                 code = region.code,
@@ -82,7 +88,7 @@ namespace NZWalks.API.Controllers
                 return NotFound();
             }
 
-            var regionDTO = mapper.Map<Domain.DTO.Region>(region);
+            var regionDTO = mapper.Map<Models.DTO.Region>(region);
 
             return Ok(regionDTO);
         }
@@ -91,7 +97,7 @@ namespace NZWalks.API.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> UpdateRegionAsync(Guid id, [FromBody]Models.DTO.UpdateRegionDTO updateRegionDTO)
         {
-            var region = new Region()
+            var region = new Models.Domain.Region()
             {
                 code = updateRegionDTO.code,
                 Area = updateRegionDTO.Area,
@@ -108,10 +114,28 @@ namespace NZWalks.API.Controllers
                 return NotFound();
             }
 
-            var regionDTO = mapper.Map<Domain.DTO.Region>(region);
+            var regionDTO = mapper.Map<Models.DTO.Region>(region);
 
             return Ok(regionDTO);
 
+        }
+
+        private bool ValidateAddRegoinAsync(Models.DTO.AddRegionRequest addRegionRequest)
+        {
+            if (addRegionRequest == null)
+            {
+                ModelState.AddModelError(nameof(addRegionRequest), $"Add regoin data is required.");
+                return false;
+            }
+
+            if (String.IsNullOrWhiteSpace(addRegionRequest.code))
+            {
+                ModelState.AddModelError(nameof(addRegionRequest.code), $"{nameof(addRegionRequest.code)} can not be null or empty or white space.");
+            }
+
+            if(ModelState.ErrorCount > 0) return false;
+
+            return true;
         }
     }
 }
