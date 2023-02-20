@@ -46,10 +46,10 @@ namespace NZWalks.API.Controllers
         public async Task<IActionResult> AddRegionAsync(AddRegionRequest addRegionRequest)
         {
             // Validate add regoin
-            if (!ValidateAddRegoinAsync(addRegionRequest))
+            /*if (!ValidateAddRegoinAsync(addRegionRequest))
             {
                 return BadRequest(ModelState);
-            }
+            }*/
 
             var region = new Models.Domain.Region()
             {
