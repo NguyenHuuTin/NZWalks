@@ -1,6 +1,4 @@
-﻿
-
-using NZWalks.API.Models.Domain;
+﻿using NZWalks.API.Models.Domain;
 
 namespace NZWalks.API.Responsitories
 {
